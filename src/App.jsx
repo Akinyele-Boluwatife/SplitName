@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import styles from "./App.module.css";
 import logo from "./assets/logo.png";
 import Roommates from "./components/Roommates";
+import Expenses from "./components/Expenses";
 
 const STORAGE_KEY = "splitmate_v1";
 
@@ -20,6 +21,18 @@ export default function App() {
     }
   });
 
+  const [expenses, setExpenses] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed?.expenses) ? parsed.expenses : [];
+    } catch (error) {
+      console.error("Failed to parse expenses from localStorage:", error);
+      return [];
+    }
+  });
+
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -30,15 +43,15 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEY);
       const existingData = saved ? JSON.parse(saved) : {};
       const dataToStore = {
-        expenses: [],
         ...existingData,
         roommates,
+        expenses,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
     } catch (error) {
       console.error("Failed to save splitmate_v1 to localStorage:", error);
     }
-  }, [roommates]);
+  }, [roommates, expenses]);
 
   return (
     <div className={styles.appLayout}>
@@ -220,7 +233,13 @@ export default function App() {
           </section>
 
           {/* Column 2: Recent Expenses */}
-          <section className={styles.card} aria-label="Recent Expenses" />
+          <section className={styles.card} aria-label="Recent Expenses">
+            <Expenses
+              roommates={roommates}
+              expenses={expenses}
+              setExpenses={setExpenses}
+            />
+          </section>
 
           {/* Column 3: Balances */}
           <section className={styles.card} aria-label="Balances" />
