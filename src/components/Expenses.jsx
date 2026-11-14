@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import styles from "./Expenses.module.css";
 
 export default function Expenses({ roommates, expenses, setExpenses }) {
@@ -53,6 +53,20 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
   };
 
   const hasRoommates = roommates.length > 0;
+
+  const handleDeleteExpense = (id) => {
+    if (window.confirm("Delete this expense?")) {
+      setExpenses((prev) => prev.filter((expense) => expense.id !== id));
+    }
+  };
+
+  const sortedExpenses = useMemo(() => {
+    return [...expenses].sort((a, b) => {
+      const dateDiff = new Date(b.date) - new Date(a.date);
+      if (dateDiff !== 0) return dateDiff;
+      return a.id.localeCompare(b.id);
+    });
+  }, [expenses]);
 
   return (
     <>
@@ -137,7 +151,7 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
         <p className={styles.emptyState}>No expenses added yet.</p>
       ) : (
         <ul className={styles.expenseList}>
-          {expenses.map((expense) => {
+          {sortedExpenses.map((expense) => {
             const payer = roommates.find((r) => r.id === expense.paidBy);
             const payerName = payer ? payer.name : "Former Roommate";
             const formattedNaira = (expense.amount / 100).toLocaleString(
@@ -160,7 +174,32 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
                     {expense.date}
                   </span>
                 </div>
-                <div className={styles.expenseAmount}>₦{formattedNaira}</div>
+                <div className={styles.expenseRight}>
+                  <div className={styles.expenseAmount}>₦{formattedNaira}</div>
+                  <button
+                    type="button"
+                    className={styles.deleteButton}
+                    onClick={() => handleDeleteExpense(expense.id)}
+                    aria-label={`Delete ${expense.description}`}
+                    title="Delete expense"
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                  </button>
+                </div>
               </li>
             );
           })}
