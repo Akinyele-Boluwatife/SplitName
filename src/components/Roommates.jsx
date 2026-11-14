@@ -1,8 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./Roommates.module.css";
 
 export default function Roommates({ roommates, setRoommates }) {
   const [nameInput, setNameInput] = useState("");
+  const [activeMenuId, setActiveMenuId] = useState(null);
+  const menuRef = useRef(null);
+  const triggerButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (!activeMenuId) return;
+
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveMenuId(null);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setActiveMenuId(null);
+        triggerButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeMenuId]);
 
   const handleAddRoommate = (e) => {
     e.preventDefault();
@@ -19,6 +46,19 @@ export default function Roommates({ roommates, setRoommates }) {
 
     setRoommates((prev) => [...prev, newRoommate]);
     setNameInput("");
+  };
+
+  const handleRemoveRoommate = (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this roommate?"
+    );
+    if (!confirmed) {
+      setActiveMenuId(null);
+      return;
+    }
+
+    setRoommates((prev) => prev.filter((r) => r.id !== id));
+    setActiveMenuId(null);
   };
 
   return (
@@ -56,22 +96,50 @@ export default function Roommates({ roommates, setRoommates }) {
                 </div>
                 <span className={styles.roommateName}>{roommate.name}</span>
               </div>
-              <button
-                type="button"
-                className={styles.moreOptionsButton}
-                aria-label={`Options for ${roommate.name}`}
+
+              <div
+                className={styles.optionsWrapper}
+                ref={activeMenuId === roommate.id ? menuRef : null}
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+                <button
+                  type="button"
+                  ref={activeMenuId === roommate.id ? triggerButtonRef : null}
+                  className={styles.moreOptionsButton}
+                  aria-label={`Options for ${roommate.name}`}
+                  aria-haspopup="true"
+                  aria-expanded={activeMenuId === roommate.id}
+                  onClick={(e) => {
+                    triggerButtonRef.current = e.currentTarget;
+                    setActiveMenuId((prev) =>
+                      prev === roommate.id ? null : roommate.id
+                    );
+                  }}
                 >
-                  <circle cx="12" cy="12" r="2" />
-                  <circle cx="19" cy="12" r="2" />
-                  <circle cx="5" cy="12" r="2" />
-                </svg>
-              </button>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <circle cx="12" cy="12" r="2" />
+                    <circle cx="19" cy="12" r="2" />
+                    <circle cx="5" cy="12" r="2" />
+                  </svg>
+                </button>
+
+                {activeMenuId === roommate.id && (
+                  <div className={styles.dropdownMenu} role="menu">
+                    <button
+                      type="button"
+                      className={styles.removeButton}
+                      role="menuitem"
+                      onClick={() => handleRemoveRoommate(roommate.id)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
             </li>
           ))}
         </ul>
