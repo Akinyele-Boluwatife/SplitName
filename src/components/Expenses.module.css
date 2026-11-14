@@ -99,6 +99,97 @@
   cursor: not-allowed;
 }
 
+/* Participants Selection */
+.participantsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: #F9FAFB;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+}
+
+.participantsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.participantsLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4B5563;
+}
+
+.selectAllButton {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.selectAllButton:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.checkboxChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.checkboxChip:hover {
+  border-color: #9CA3AF;
+  background-color: #F3F4F6;
+}
+
+.checkboxChipActive {
+  background-color: #ECFDF5;
+  border-color: #059669;
+  color: #065F46;
+  font-weight: 600;
+}
+
+.checkboxInput {
+  accent-color: #059669;
+  cursor: pointer;
+  margin: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.checkboxLabel {
+  white-space: nowrap;
+}
+
+.validationNotice {
+  font-size: 11px;
+  color: #DC2626;
+  font-weight: 500;
+}
+
 .addButton {
   padding: 10px 16px;
   font-size: 14px;

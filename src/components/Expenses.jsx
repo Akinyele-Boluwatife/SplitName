@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import styles from "./Expenses.module.css";
 
 export default function Expenses({ roommates, expenses, setExpenses }) {
@@ -6,12 +6,45 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
   const [amount, setAmount] = useState("");
   const [paidBy, setPaidBy] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [selectedParticipants, setSelectedParticipants] = useState(() =>
+    roommates.map((r) => r.id)
+  );
+
+  // Sync selected participants when roommates array changes
+  useEffect(() => {
+    const currentIds = new Set(roommates.map((r) => r.id));
+    const prevIds = Expenses._prevRoommateIds || currentIds;
+    Expenses._prevRoommateIds = currentIds;
+
+    const newlyAddedIds = roommates
+      .map((r) => r.id)
+      .filter((id) => !prevIds.has(id));
+
+    setSelectedParticipants((prev) => {
+      const valid = prev.filter((id) => currentIds.has(id));
+      return [...valid, ...newlyAddedIds];
+    });
+  }, [roommates]);
 
   // Selected payer defaults to first roommate if not explicitly selected or if previous payer was removed
   const selectedPayerId =
     paidBy && roommates.some((r) => r.id === paidBy)
       ? paidBy
       : roommates[0]?.id || "";
+
+  const handleToggleParticipant = (id) => {
+    setSelectedParticipants((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllParticipants = () => {
+    if (selectedParticipants.length === roommates.length) {
+      setSelectedParticipants([]);
+    } else {
+      setSelectedParticipants(roommates.map((r) => r.id));
+    }
+  };
 
   const handleAddExpense = (e) => {
     e.preventDefault();
@@ -22,16 +55,23 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
     if (!trimmedDesc || isNaN(parsedAmount) || parsedAmount <= 0) return;
     if (roommates.length === 0 || !selectedPayerId) return;
 
+    // Filter selected participants to active roommates
+    const activeParticipantIds = selectedParticipants.filter((id) =>
+      roommates.some((r) => r.id === id)
+    );
+    if (activeParticipantIds.length === 0) return;
+
     // Convert Naira to Kobo
     const totalKobo = Math.round(parsedAmount * 100);
     if (totalKobo < 1) return;
-    const numRoommates = roommates.length;
-    const baseSplit = Math.floor(totalKobo / numRoommates);
-    const remainder = totalKobo % numRoommates;
+
+    const numParticipants = activeParticipantIds.length;
+    const baseSplit = Math.floor(totalKobo / numParticipants);
+    const remainder = totalKobo % numParticipants;
 
     // Distribute equally with remainder given to first participant
-    const splits = roommates.map((roommate, index) => ({
-      userId: roommate.id,
+    const splits = activeParticipantIds.map((userId, index) => ({
+      userId,
       amount: index === 0 ? baseSplit + remainder : baseSplit,
     }));
 
@@ -47,9 +87,10 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
 
     setExpenses((prev) => [newExpense, ...prev]);
 
-    // Reset inputs
+    // Reset inputs and restore participants to all active roommates
     setDescription("");
     setAmount("");
+    setSelectedParticipants(roommates.map((r) => r.id));
   };
 
   const hasRoommates = roommates.length > 0;
@@ -125,6 +166,56 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
           </select>
         </div>
 
+        {/* Participants Checkbox Selection */}
+        {hasRoommates && (
+          <div className={styles.participantsSection}>
+            <div className={styles.participantsHeader}>
+              <span className={styles.participantsLabel}>
+                Split with ({selectedParticipants.length} of {roommates.length}):
+              </span>
+              <button
+                type="button"
+                onClick={handleSelectAllParticipants}
+                className={styles.selectAllButton}
+              >
+                {selectedParticipants.length === roommates.length
+                  ? "Deselect All"
+                  : "Select All"}
+              </button>
+            </div>
+
+            <div className={styles.checkboxGroup}>
+              {roommates.map((roommate) => {
+                const isSelected = selectedParticipants.includes(roommate.id);
+                return (
+                  <label
+                    key={roommate.id}
+                    className={`${styles.checkboxChip} ${
+                      isSelected ? styles.checkboxChipActive : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleToggleParticipant(roommate.id)}
+                      className={styles.checkboxInput}
+                    />
+                    <span className={styles.checkboxLabel}>
+                      {roommate.name}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {selectedParticipants.length === 0 && (
+              <span className={styles.validationNotice}>
+                Select at least one participant to split with.
+              </span>
+            )}
+          </div>
+        )}
+
         <div className={styles.formRow}>
           <input
             type="date"
@@ -139,7 +230,7 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
           <button
             type="submit"
             className={styles.addButton}
-            disabled={!hasRoommates}
+            disabled={!hasRoommates || selectedParticipants.length === 0}
           >
             Add Expense
           </button>

@@ -3,6 +3,7 @@ import styles from "./App.module.css";
 import logo from "./assets/logo.png";
 import Roommates from "./components/Roommates";
 import Expenses from "./components/Expenses";
+import Balances from "./components/Balances";
 
 const STORAGE_KEY = "splitmate_v1";
 
@@ -17,6 +18,23 @@ export default function App() {
       return Array.isArray(parsed?.roommates) ? parsed.roommates : [];
     } catch (error) {
       console.error("Failed to parse splitmate_v1 from localStorage:", error);
+      return [];
+    }
+  });
+
+  const [deletedRoommates, setDeletedRoommates] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed?.deletedRoommates)
+        ? parsed.deletedRoommates
+        : [];
+    } catch (error) {
+      console.error(
+        "Failed to parse deletedRoommates from localStorage:",
+        error
+      );
       return [];
     }
   });
@@ -45,13 +63,14 @@ export default function App() {
       const dataToStore = {
         ...existingData,
         roommates,
+        deletedRoommates,
         expenses,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToStore));
     } catch (error) {
       console.error("Failed to save splitmate_v1 to localStorage:", error);
     }
-  }, [roommates, expenses]);
+  }, [roommates, deletedRoommates, expenses]);
 
   return (
     <div className={styles.appLayout}>
@@ -229,6 +248,8 @@ export default function App() {
             <Roommates
               roommates={roommates}
               setRoommates={setRoommates}
+              setDeletedRoommates={setDeletedRoommates}
+              expenses={expenses}
             />
           </section>
 
@@ -242,7 +263,13 @@ export default function App() {
           </section>
 
           {/* Column 3: Balances */}
-          <section className={styles.card} aria-label="Balances" />
+          <section className={styles.card} aria-label="Balances">
+            <Balances
+              roommates={roommates}
+              deletedRoommates={deletedRoommates}
+              expenses={expenses}
+            />
+          </section>
         </section>
       </main>
     </div>

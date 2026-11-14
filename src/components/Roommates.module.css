@@ -196,8 +196,14 @@
   white-space: nowrap;
 }
 
-.removeButton:hover {
+.removeButton:hover:not(:disabled) {
   background-color: #FEF2F2;
+}
+
+.removeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #9CA3AF;
 }
 
 .removeButton:focus-visible {
