@@ -1,3 +1,4 @@
+/* Original App.module.css content */
 .appLayout {
   display: flex;
   min-height: 100vh;
@@ -244,7 +245,7 @@
   height: 40px;
   border-radius: 50%;
   background: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #E5E5EB;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,8 +320,31 @@
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .card {
     min-height: 400px;
+  }
+}
+
+/* Mobile overrides – ensure these come after all other rules */
+@media (max-width: 768px) {
+  .appLayout {
+    display: block;
+  }
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .mainContent {
+    padding: 16px;
+    margin: 0;
+    width: 100%;
+  }
+  .gridContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
 }

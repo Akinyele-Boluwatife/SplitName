@@ -48,10 +48,20 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
       ? paidBy
       : roommates[0]?.id || "";
 
+  // FIX M2: when unchecking in Exact Amounts mode, purge stale customAmounts entry
+  //          so the input doesn't show a ghost value on re-check.
   const handleToggleParticipant = (id) => {
+    const isCurrentlySelected = selectedParticipants.includes(id);
     setSelectedParticipants((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      isCurrentlySelected ? prev.filter((item) => item !== id) : [...prev, id]
     );
+    if (isCurrentlySelected) {
+      setCustomAmounts((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
   };
 
   const handleSelectAllParticipants = () => {
@@ -76,9 +86,10 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
     }));
   };
 
+  // FIX Float Leak: use Number.EPSILON to avoid IEEE-754 rounding errors (e.g. 1.005 → 100 not 99)
   const parsedTotalAmount = parseFloat(amount);
   const totalKobo = !isNaN(parsedTotalAmount) && parsedTotalAmount > 0
-    ? Math.round(parsedTotalAmount * 100)
+    ? Math.round(parsedTotalAmount * 100 + Number.EPSILON)
     : 0;
 
   const activeParticipantIds = selectedParticipants.filter((id) =>
@@ -88,7 +99,8 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
   // Calculate sum of custom allocations in integer kobo
   const sumOfCustomSplits = activeParticipantIds.reduce((sum, id) => {
     const val = parseFloat(customAmounts[id]);
-    const kobo = !isNaN(val) && val > 0 ? Math.round(val * 100) : 0;
+    // FIX Float Leak: Number.EPSILON guards against sub-kobo drift (e.g. 1.005 * 100 = 100.49999...)
+    const kobo = !isNaN(val) && val > 0 ? Math.round(val * 100 + Number.EPSILON) : 0;
     return sum + kobo;
   }, 0);
 
@@ -145,7 +157,8 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
       splits = activeParticipantIds
         .map((userId) => {
           const val = parseFloat(customAmounts[userId]);
-          const kobo = !isNaN(val) && val > 0 ? Math.round(val * 100) : 0;
+          // FIX Float Leak: Number.EPSILON prevents drift when converting custom amounts to kobo
+          const kobo = !isNaN(val) && val > 0 ? Math.round(val * 100 + Number.EPSILON) : 0;
           return {
             userId,
             amount: kobo,
@@ -448,6 +461,7 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
             )}
             {splitType === "amount" && totalKobo > 0 ? (
               <div
+                aria-live="polite"
                 className={`${styles.unassignedNotice} ${
                   unassignedKobo === 0
                     ? styles.unassignedNoticeMatch
@@ -480,6 +494,7 @@ export default function Expenses({ roommates, expenses, setExpenses }) {
               </div>
             ) : splitType === "percent" ? (
               <div
+                aria-live="polite"
                 className={`${styles.unassignedNotice} ${
                   percentagesTotalMatch
                     ? styles.unassignedNoticeMatch
