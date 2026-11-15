@@ -103,11 +103,57 @@
 .participantsSection {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   background-color: #F9FAFB;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: 10px;
   border: 1px solid #E5E7EB;
+}
+
+.splitTypeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.participantsLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.splitToggleGroup {
+  display: flex;
+  background-color: #E5E7EB;
+  padding: 2px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.toggleButton {
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #6B7280;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toggleButton:hover {
+  color: #111827;
+}
+
+.toggleButtonActive {
+  background-color: #FFFFFF;
+  color: #059669;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .participantsHeader {
@@ -116,7 +162,7 @@
   justify-content: space-between;
 }
 
-.participantsLabel {
+.participantsSubLabel {
   font-size: 12px;
   font-weight: 600;
   color: #4B5563;
@@ -138,6 +184,7 @@
   text-decoration: underline;
 }
 
+/* Equal Mode */
 .checkboxGroup {
   display: flex;
   flex-wrap: wrap;
@@ -184,10 +231,178 @@
   white-space: nowrap;
 }
 
+/* Custom Amounts Mode */
+.customAmountsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.customAmountRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: opacity 0.15s ease;
+}
+
+.customAmountRowDisabled {
+  opacity: 0.5;
+  background-color: #F9FAFB;
+}
+
+.customAmountLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  cursor: pointer;
+}
+
+.customAmountName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1F2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customInputWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 105px;
+}
+
+.currencyPrefix {
+  position: absolute;
+  left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  pointer-events: none;
+}
+
+.customInputField {
+  width: 100%;
+  padding: 5px 8px 5px 20px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  text-align: right;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  background-color: #FFFFFF;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.customInputField:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+}
+
+.customInputField:disabled {
+  background-color: #F3F4F6;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.percentageInputWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 90px;
+}
+
+.percentageInputField {
+  width: 100%;
+  padding: 5px 20px 5px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  text-align: right;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  background-color: #FFFFFF;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.percentageInputField:focus {
+  border-color: #059669;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
+}
+
+.percentageInputField:disabled {
+  background-color: #F3F4F6;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.percentageSuffix {
+  position: absolute;
+  right: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  pointer-events: none;
+}
+
+/* Feedback & Banners */
 .validationNotice {
   font-size: 11px;
   color: #DC2626;
   font-weight: 500;
+}
+
+.unassignedNotice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.unassignedNoticePending {
+  background-color: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+
+.unassignedNoticeOver {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FECACA;
+}
+
+.unassignedNoticeMatch {
+  background-color: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+}
+
+.splitTypeBadge {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #047857;
+  background-color: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
 }
 
 .addButton {
